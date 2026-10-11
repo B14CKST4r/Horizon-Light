@@ -230,8 +230,10 @@
   }
 
   /* ===== 倒计时结束后：视频揭晓 ===== */
+  /* 必须覆盖 fade-in 的 animation（forwards 会锁死 opacity:1，导致 .gone 的 opacity:0 无效） */
   .timer.gone,
   .meta-block.gone {
+    animation: none;
     opacity: 0;
     transform: translateY(-10px);
     transition: opacity 0.9s ease, transform 0.9s ease;
@@ -464,12 +466,17 @@
     // 倒计时数字
     if (remain <= 0) {
       setNum('d', 0, 0); setNum('h', 0, 2); setNum('m', 0, 2); setNum('s', 0, 2);
-      // 倒计时归零 → 揭晓视频
+      // 倒计时归零 → 先淡出倒计时，再揭晓视频
       if (!revealed) {
         revealed = true;
         timerEl.classList.add('gone');
         metaEl.classList.add('gone');
-        revealEl.classList.add('show');
+        // 淡出完成后彻底移除倒计时占位，再让视频进场
+        setTimeout(function () {
+          timerEl.style.display = 'none';
+          metaEl.style.display = 'none';
+          revealEl.classList.add('show');
+        }, 950);
       }
       return;
     }
